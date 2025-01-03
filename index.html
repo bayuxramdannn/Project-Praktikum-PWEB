@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hotel Kuningan</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Hotel Kuningan</h1>
+    </header>
+
+    <nav id="mainNav">
+      <span class="nav-button" onclick="showSection('consumer')">Beranda</span>
+      <span class="nav-button" onclick="showLoginForm()">Admin Login</span>
+    </nav>
+
+    <section id="loginSection" class="hidden">
+      <div class="login-container container">
+        <h2>Login Admin</h2>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required />
+          </div>
+          <button type="submit">Login</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="adminDashboard" class="hidden">
+      <div class="container">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+          "
+        >
+          <h2>Admin Dashboard</h2>
+          <button
+            id="logoutButton"
+            onclick="handleLogout()"
+            style="width: auto"
+          >
+            Logout
+          </button>
+        </div>
+
+        <div class="admin-controls">
+          <div class="card">
+            <h3>Manajemen Kamar</h3>
+            <form onsubmit="handleAddRoom(event)">
+              <div class="form-group">
+                <label for="roomType">Tipe Kamar</label>
+                <input type="text" id="roomType" required />
+              </div>
+              <div class="form-group">
+                <label for="roomPrice">Harga PerMalam</label>
+                <input type="number" id="roomPrice" required />
+              </div>
+              <button type="submit">Tambahkan Kamar</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Manajemen Fasilitas</h3>
+            <form onsubmit="handleAddFacility(event)">
+              <div class="form-group">
+                <label for="facilityName">Nama Fasilitas</label>
+                <input type="text" id="facilityName" required />
+              </div>
+              <button type="submit">Tambah Fasilitas/button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem">
+          <h3>From Pemesanan</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ID Pemesanan</th>
+                <th>Nama</th>
+                <th>Tipe Kamar</th>
+                <th>Durasi Menginap</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTable">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="consumerSection">
+      <div class="container">
+        <h2>Selamat Datang di Hotel Kuningan</h2>
+
+        <h3>Kamar yang Tersedia</h3>
+        <div class="room-grid" id="roomsDisplay">
+        </div>
+
+        <h3>Fasilitas yang Kami Miliki</h3>
+        <div class="facility-grid" id="facilitiesDisplay">
+        </div>
+
+        <div class="card">
+          <h3>Pesan Kamar</h3>
+          <form onsubmit="handleBooking(event)">
+            <div class="form-group">
+              <label for="guestName">Nama</label>
+              <input type="text" id="guestName" required />
+            </div>
+            <div class="form-group">
+              <label for="bookingRoom">Pilih Tipe Kamar</label>
+              <select id="bookingRoom" required>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="duration">Durasi Menginap</label>
+              <input type="number" id="duration" min="1" required />
+            </div>
+            <button type="submit">Pesan Sekarang</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      let rooms = [
+        { type: "Standard Room", price: 500000 },
+        { type: "Deluxe Room", price: 750000 },
+        { type: "Family Suite", price: 1000000 },
+      ];
+
+      let facilities = ["Kolam Berenang", "GYM", "Restaurant"];
+
+      let bookings = [
+        {
+          id: 1,
+          guestName: "Bayu Ramdan",
+          roomType: "Deluxe Room",
+          duration: 3,
+          total: 2250000,
+        },
+      ];
+
+      let isLoggedIn = false;
+
+      function showLoginForm() {
+        document.getElementById("loginSection").classList.remove("hidden");
+        document.getElementById("consumerSection").classList.add("hidden");
+        document.getElementById("adminDashboard").classList.add("hidden");
+      }
+
+      function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (username === "admin" && password === "admin123") {
+          isLoggedIn = true;
+          document.getElementById("loginSection").classList.add("hidden");
+          document.getElementById("adminDashboard").classList.remove("hidden");
+          updateNav();
+        } else {
+          alert("Invalid credentials");
+        }
+      }
+
+      function handleLogout() {
+        isLoggedIn = false;
+        document.getElementById("adminDashboard").classList.add("hidden");
+        document.getElementById("consumerSection").classList.remove("hidden");
+        updateNav();
+      }
+
+      function updateNav() {
+        const nav = document.getElementById("mainNav");
+        nav.innerHTML = isLoggedIn
+          ? '<span class="nav-button" onclick="showSection(\'adminDashboard\')">Dashboard</span>'
+          : '<span class="nav-button" onclick="showSection(\'consumer\')">Home</span><span class="nav-button" onclick="showLoginForm()">Admin Login</span>';
+      }
+
+      function handleAddRoom(event) {
+        event.preventDefault();
+        const type = document.getElementById("roomType").value;
+        const price = parseInt(document.getElementById("roomPrice").value);
+        rooms.push({ type, price });
+        updateRoomsDisplay();
+        event.target.reset();
+      }
+
+      function handleAddFacility(event) {
+        event.preventDefault();
+        const facility = document.getElementById("facilityName").value;
+        facilities.push(facility);
+        updateFacilitiesDisplay();
+        event.target.reset();
+      }
+
+      function handleBooking(event) {
+        event.preventDefault();
+        const guestName = document.getElementById("guestName").value;
+        const roomType = document.getElementById("bookingRoom").value;
+        const duration = parseInt(document.getElementById("duration").value);
+
+        const room = rooms.find((r) => r.type === roomType);
+        const total = room.price * duration;
+
+        const booking = {
+          id: bookings.length + 1,
+          guestName,
+          roomType,
+          duration,
+          total,
+        };
+
+        bookings.push(booking);
+        updateBookingsTable();
+        event.target.reset();
+        alert("Pemesanan Berhasil");
+      }
+
+      function updateRoomsDisplay() {
+        const roomsDisplay = document.getElementById("roomsDisplay");
+        const roomSelect = document.getElementById("bookingRoom");
+
+        roomsDisplay.innerHTML = rooms
+          .map(
+            (room) => `
+                <div class="card">
+                    <h4>${room.type}</h4>
+                    <p>Rp ${room.price.toLocaleString()} per malam</p>
+                </div>
+            `
+          )
+          .join("");
+
+        roomSelect.innerHTML = rooms
+          .map(
+            (room) => `
+                <option value="${room.type}">${
+              room.type
+            } - Rp ${room.price.toLocaleString()}</option>
+            `
+          )
+          .join("");
+      }
+
+      function updateFacilitiesDisplay() {
+        const facilitiesDisplay = document.getElementById("facilitiesDisplay");
+        facilitiesDisplay.innerHTML = facilities
+          .map(
+            (facility) => `
+                <div class="card">
+                    <h4>${facility}</h4>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function updateBookingsTable() {
+        const bookingsTable = document.getElementById("bookingsTable");
+        bookingsTable.innerHTML = bookings
+          .map(
+            (booking) => `
+                <tr>
+                    <td>${booking.id}</td>
+                    <td>${booking.guestName}</td>
+                    <td>${booking.roomType}</td>
+                    <td>${booking.duration} Nights</td>
+                    <td>Rp ${booking.total.toLocaleString()}</td>
+                </tr>
+            `
+          )
+          .join("");
+      }
+
+      function showSection(section) {
+        const sections = ["loginSection", "adminDashboard", "consumerSection"];
+        sections.forEach((s) =>
+          document.getElementById(s).classList.add("hidden")
+        );
+        document
+          .getElementById(section === "consumer" ? "consumerSection" : section)
+          .classList.remove("hidden");
+      }
+
+      window.onload = () => {
+        updateRoomsDisplay();
+        updateFacilitiesDisplay();
+        updateBookingsTable();
+        showSection("consumer");
+      };
+    </script>
+  </body>
+</html>
